@@ -22,7 +22,7 @@ st.markdown('<p class="header">Show Office Bearers Details</p>', unsafe_allow_ht
 # Create a form for user input
 with st.sidebar:
     st.subheader("Navigation Options")
-    option = st.radio('Select an option:', ('Show Details', 'Update Details', 'Delete Details'))
+    option = st.radio('Select an option:', ('Show Details','Add Details' ,'Update Details', 'Delete Details'))
 
 # Set a background color for the main page
 st.markdown(
@@ -49,8 +49,8 @@ if option == 'Show Details':
             conn = mysql.connector.connect(
                 host="localhost",
                 user="root",
-                password="purva@125",
-                database="dbmsproj"
+                password="104020",
+                database="proj"
             )
             if conn.is_connected():
                 cursor = conn.cursor()
@@ -102,9 +102,9 @@ if option == 'Show Details':
             if conn.is_connected():
                 cursor.close()
                 conn.close()
-elif option == 'Update Details':
+elif option == 'Add Details':
     # Add code for update details here
-    st.write("Update Details Option Selected")
+    st.write("Add Details Option Selected")
     with st.form(key='update_form'):
         netid_input= st.text_input(label='Enter the netid')
         name_input= st.text_input(label='Enter the name')
@@ -119,8 +119,8 @@ elif option == 'Update Details':
             conn = mysql.connector.connect(
                 host="localhost",
                 user="root",
-                password="purva@125",
-                database="dbmsproj"
+                password="104020",
+                database="proj"
             )
             if conn.is_connected():
                 cursor = conn.cursor()
@@ -131,6 +131,42 @@ elif option == 'Update Details':
                     query = "INSERT INTO office_bearers (net_id,name,position,major,year,phone_no) VALUES (%s, %s, %s, %s, %s,%s)"
                  
                     cursor.execute(query, ( netid_input,name_input,position_input, major_input, year_input,phone_input))
+                    conn.commit()
+                    st.success("Details added successfully!")
+
+        except mysql.connector.Error as e:
+            st.error(f"Error connecting to MySQL database: {e}")
+
+        finally:
+            if conn.is_connected():
+                cursor.close()
+                conn.close()
+elif option == 'Update Details':
+    # Update details option
+    st.write("Update Details Option Selected")
+    with st.form(key='update_form'):
+        field_input = st.text_input(label='Enter the field to update (e.g., position, major, year):')
+        data_input = st.text_input(label='Enter the data to add:')
+        filter_field_input = st.text_input(label='Enter the filter field (primary key or other field):')
+        filter_data_input = st.text_input(label='Enter the filter data (to match the filter field):')
+        submit_button = st.form_submit_button(label='Update')
+
+        # Connect to the database
+        try:
+            conn = mysql.connector.connect(
+                host="localhost",
+                user="root",
+                password="104020",
+                database="proj"
+            )
+            if conn.is_connected():
+                cursor = conn.cursor()
+
+                # Check if the form is submitted
+                if submit_button:
+                    # Update the details in the database
+                    query = f"UPDATE office_bearers SET {field_input}=%s WHERE {filter_field_input}=%s"
+                    cursor.execute(query, (data_input, filter_data_input))
                     conn.commit()
                     st.success("Details updated successfully!")
 
@@ -156,8 +192,8 @@ else:
             conn = mysql.connector.connect(
                 host="localhost",
                 user="root",
-                password="purva@125",
-                database="dbmsproj"
+                password="104020",
+                database="proj"
             )
             if conn.is_connected():
                 cursor = conn.cursor()
