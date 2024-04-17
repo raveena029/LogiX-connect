@@ -1,0 +1,15 @@
++----------+---------------+--------------+------------------------+------+
+| cr_netID | name          | phone_no     | major                  | year |
++----------+---------------+--------------+------------------------+------+
+| ag012    | Anjali Gupta  | 444-789-1234 | Biology                | 2026 |
+| as789    | Amit Singh    | 555-123-4567 | Physics                | 2025 |
+| dv901    | Deepak Verma  | 111-222-3333 | Economics              | 2026 |
+| nm678    | Neha Mishra   | 333-222-1111 | Chemistry              | 2025 |
+| pp456    | Priya Patel   | 987-654-3210 | Electrical Engineering | 2025 |
+| rp567    | Rajesh Patel  | 666-555-4444 | History                | 2026 |
+| rs123    | Rahul Sharma  | 123-456-7890 | Computer Science       | 2025 |
+| sg890    | Shivani Gupta | 123-987-4560 | Psychology             | 2026 |
+| sr234    | Sneha Reddy   | 999-888-7777 | Political Science      | 2025 |
+| td777    | Random Person | 777-777-7777 | Mathematics            | 2025 |
+| vk345    | Vivek Kumar   | 777-888-9999 | Mathematics            | 2026 |
++----------+---------------+--------------+------------------------+------+
