@@ -164,11 +164,22 @@ elif option == 'Update Details':
 
                 # Check if the form is submitted
                 if submit_button:
-                    # Update the details in the database
-                    query = f"UPDATE office_bearers SET {field_input}=%s WHERE {filter_field_input}=%s"
-                    cursor.execute(query, (data_input, filter_data_input))
-                    conn.commit()
-                    st.success("Details updated successfully!")
+                    # Check if filter field and data are provided
+                    if filter_field_input and filter_data_input:
+                        # Update the details in the database based on the filter
+                        query = f"UPDATE office_bearers SET {field_input}=%s WHERE {filter_field_input}=%s"
+                        cursor.execute(query, (data_input, filter_data_input))
+                        if cursor.rowcount == 0:
+                            st.error("No such record exists.")
+                        else:
+                            conn.commit()
+                            st.success("Details updated successfully!")
+                    else:
+                        # Update all records if no filter is provided
+                        query = f"UPDATE office_bearers SET {field_input}=%s"
+                        cursor.execute(query, (data_input,))
+                        conn.commit()
+                        st.success("Details updated for all records!")
 
         except mysql.connector.Error as e:
             st.error(f"Error connecting to MySQL database: {e}")
@@ -177,6 +188,7 @@ elif option == 'Update Details':
             if conn.is_connected():
                 cursor.close()
                 conn.close()
+
 
 else:
    # Add code for delete details here
