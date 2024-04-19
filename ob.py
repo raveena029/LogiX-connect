@@ -217,10 +217,10 @@ else:
                 if submit_button:
                     # Determine the query based on input columns
                     if position_input and major_input and year_input:
-                        query = "call delete_ob_one(%s,%s,%s,%s,%s,%s)"
+                        query = "call delete_ob_three(%s,%s,%s,%s,%s,%s)"
                         cursor.execute(query, (pos,position_input,maj, major_input, y,year_input))
                     elif position_input and major_input:
-                        query = "call delete_ob_one(%s,%s,%s,%s)"
+                        query = "call delete_ob_two(%s,%s,%s,%s)"
                         cursor.execute(query, (pos,position_input, maj,major_input))
                     elif position_input and year_input:
                         query = "call delete_ob_two(%s,%s,%s,%s)"
