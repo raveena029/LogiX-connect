@@ -1,4 +1,3 @@
-
 import streamlit as st
 import mysql.connector
 import pandas as pd
@@ -18,7 +17,7 @@ st.markdown(
     """
     , unsafe_allow_html=True
 )
-st.markdown('<p class="header">Show Executive Cabinet Details</p>', unsafe_allow_html=True)
+st.markdown('<p class="header">Executive Cabinet Details</p>', unsafe_allow_html=True)
 
 # Create a form for user input
 with st.sidebar:
@@ -42,7 +41,9 @@ if option == 'Show Details':
         position_input = st.text_input(label='Enter the Position:')
         major_input = st.text_input(label='Enter the Major:')
         year_input = st.text_input(label='Enter the Year:')
-
+        pos="position"
+        maj="major"
+        y="year"
         submit_button = st.form_submit_button(label='Submit')
 
         # Connect to the database
@@ -50,8 +51,8 @@ if option == 'Show Details':
             conn = mysql.connector.connect(
                 host="localhost",
                 user="root",
-                password="purva@125",
-                database="dbmsproj"
+                password="104020",
+                database="proj"
             )
             if conn.is_connected():
                 cursor = conn.cursor()
@@ -60,28 +61,28 @@ if option == 'Show Details':
                 if submit_button:
                     # Determine the query based on input columns
                     if position_input and major_input and year_input:
-                        query = "SELECT * FROM executive_cabinet WHERE position=%s AND major=%s AND year=%s"
-                        cursor.execute(query, (position_input, major_input, year_input))
+                        query = "call display_ec_three(%s,%s,%s,%s,%s,%s)"
+                        cursor.execute(query, (pos,position_input, maj,major_input,y, year_input))
                     elif position_input and major_input:
-                        query = "SELECT * FROM executive_cabinet WHERE position=%s AND major=%s"
-                        cursor.execute(query, (position_input, major_input))
+                        query = "call display_ec_two(%s,%s,%s,%s)"
+                        cursor.execute(query, (pos,position_input, maj,major_input))
                     elif position_input and year_input:
-                        query = "SELECT * FROM executive_cabinet WHERE position=%s AND year=%s"
-                        cursor.execute(query, (position_input, year_input))
+                        query = "call display_ec_two(%s,%s,%s,%s)"
+                        cursor.execute(query, (pos,position_input, y,year_input))
                     elif major_input and year_input:
-                        query = "SELECT * FROM executive_cabinet WHERE major=%s AND year=%s"
-                        cursor.execute(query, (major_input, year_input))
+                        query = "call display_ec_two(%s,%s,%s,%s)"
+                        cursor.execute(query, (maj,major_input,y, year_input))
                     elif position_input:
-                        query = "SELECT * FROM executive_cabinet WHERE position=%s"
-                        cursor.execute(query, (position_input,))
+                        query = "call display_ec_one(%s,%s)"
+                        cursor.execute(query, (pos,position_input,))
                     elif major_input:
-                        query = "SELECT * FROM executive_cabinet WHERE major=%s"
-                        cursor.execute(query, (major_input,))
+                        query = "call display_ec_one(%s,%s)"
+                        cursor.execute(query, (maj,major_input,))
                     elif year_input:
-                        query = "SELECT * FROM executive_cabinet WHERE year=%s"
-                        cursor.execute(query, (year_input,))
+                        query = "call display_ec_one(%s,%s)"
+                        cursor.execute(query, (y,year_input,))
                     else:
-                        query = "SELECT * FROM executive_cabinet"
+                        query = "call display_ec_all()"
                         cursor.execute(query)
 
                     rows = cursor.fetchall()
@@ -113,6 +114,7 @@ elif option == 'Add Details':
         major_input = st.text_input(label='Enter the Major:')
         year_input = st.text_input(label='Enter the Year:')
         phone_input=  st.text_input(label='Enetr the phone')
+        email_input=  st.text_input(label='Enetr the email')
         submit_button = st.form_submit_button(label='Update')
 
         # Connect to the database
@@ -129,9 +131,9 @@ elif option == 'Add Details':
                 # Check if the form is submitted
                 if submit_button:
                     # Update the details in the database
-                    query = "INSERT INTO executive_cabinet (net_id,name,position,major,year,phone_no) VALUES (%s, %s, %s, %s, %s,%s)"
+                    query = "call insert_into_ec(%s, %s, %s, %s, %s,%s,%s)"
                  
-                    cursor.execute(query, ( netid_input,name_input,position_input, major_input, year_input,phone_input))
+                    cursor.execute(query, (netid_input,name_input,position_input, major_input, year_input,phone_input,email_input))
                     conn.commit()
                     st.success("Details added successfully!")
 
@@ -157,8 +159,8 @@ elif option == 'Update Details':
             conn = mysql.connector.connect(
                 host="localhost",
                 user="root",
-                password="purva@125",
-                database="dbmsproj"
+                password="104020",
+                database="proj"
             )
             if conn.is_connected():
                 cursor = conn.cursor()
@@ -168,8 +170,8 @@ elif option == 'Update Details':
                     # Check if filter field and data are provided
                     if filter_field_input and filter_data_input:
                         # Update the details in the database based on the filter
-                        query = f"UPDATE office_bearers SET {field_input}=%s WHERE {filter_field_input}=%s"
-                        cursor.execute(query, (data_input, filter_data_input))
+                        query = "call update_ec(%s,%s,%s,%s)"
+                        cursor.execute(query, (field_input,data_input, filter_field_input,filter_data_input))
                         if cursor.rowcount == 0:
                             st.error("No such record exists.")
                         else:
@@ -177,8 +179,8 @@ elif option == 'Update Details':
                             st.success("Details updated successfully!")
                     else:
                         # Update all records if no filter is provided
-                        query = f"UPDATE office_bearers SET {field_input}=%s"
-                        cursor.execute(query, (data_input,))
+                        query ="call update_ec_for_all(%s,%s)"
+                        cursor.execute(query, (field_input,data_input))
                         conn.commit()
                         st.success("Details updated for all records!")
 
@@ -189,8 +191,6 @@ elif option == 'Update Details':
             if conn.is_connected():
                 cursor.close()
                 conn.close()
-
-
 else:
    # Add code for delete details here
     st.write("Delete Details Option Selected")
@@ -198,6 +198,9 @@ else:
         position_input = st.text_input(label='Enter the Position:')
         major_input = st.text_input(label='Enter the Major:')
         year_input = st.text_input(label='Enter the Year:')
+        pos="position"
+        maj="major"
+        y="year"
         submit_button = st.form_submit_button(label='Delete')
 
         # Connect to the database
@@ -205,8 +208,8 @@ else:
             conn = mysql.connector.connect(
                 host="localhost",
                 user="root",
-                password="purva@125",
-                database="dbmsproj"
+                password="104020",
+                database="proj"
             )
             if conn.is_connected():
                 cursor = conn.cursor()
@@ -215,29 +218,30 @@ else:
                 if submit_button:
                     # Determine the query based on input columns
                     if position_input and major_input and year_input:
-                        query = "DELETE FROM executive_cabinet WHERE position=%s AND major=%s AND year=%s"
-                        cursor.execute(query, (position_input, major_input, year_input))
+                        query = "call delete_ec_three(%s,%s,%s,%s,%s,%s)"
+                        cursor.execute(query, (pos,position_input,maj, major_input, y,year_input))
                     elif position_input and major_input:
-                        query = "DELETE FROM executive_cabinet WHERE position=%s AND major=%s"
-                        cursor.execute(query, (position_input, major_input))
+                        query = "call delete_ec_two(%s,%s,%s,%s)"
+                        cursor.execute(query, (pos,position_input, maj,major_input))
                     elif position_input and year_input:
-                        query = "DELETE FROM executive_cabinet WHERE position=%s AND year=%s"
-                        cursor.execute(query, (position_input, year_input))
+                        query = "call delete_ec_two(%s,%s,%s,%s)"
+                        cursor.execute(query, (pos,position_input,y, year_input))
                     elif major_input and year_input:
-                        query = "DELETE FROM executive_cabinet WHERE major=%s AND year=%s"
-                        cursor.execute(query, (major_input, year_input))
+                        query = "call delete_ec_two(%s,%s,%s,%s)"
+                        cursor.execute(query, (maj,major_input, y,year_input))
                     elif position_input:
-                        query = "DELETE FROM executive_cabinet WHERE position=%s"
-                        cursor.execute(query, (position_input,))
+                        query = "call delete_ec_one(%s,%s)"
+                        cursor.execute(query, (pos,position_input))
                     elif major_input:
-                        query = "DELETE FROM executive_cabinet WHERE major=%s"
-                        cursor.execute(query, (major_input,))
+                        query = "call delete_ec_one(%s,%s)"
+                        cursor.execute(query, (maj,major_input))
                     elif year_input:
-                        query = "DELETE FROM executive_cabinet WHERE year=%s"
-                        cursor.execute(query, (year_input,))
+                        query = "call delete_ec_one(%s,%s)"
+                        cursor.execute(query, (y,year_input))
                     else:
-                        query = "DELETE FROM executive_cabinet"
+                        query = "call delete_all_ec()"
                         cursor.execute(query)
+
 
                     conn.commit()  # Commit the transaction
 
