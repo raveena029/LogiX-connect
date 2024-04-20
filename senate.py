@@ -1,4 +1,3 @@
-
 import streamlit as st
 import mysql.connector
 import pandas as pd
@@ -18,7 +17,7 @@ st.markdown(
     """
     , unsafe_allow_html=True
 )
-st.markdown('<p class="header">Show Senate</p>', unsafe_allow_html=True)
+st.markdown('<p class="header">Show Class Represenatatives</p>', unsafe_allow_html=True)
 
 # Create a form for user input
 with st.sidebar:
@@ -38,11 +37,14 @@ st.markdown(
 )
 
 if option == 'Show Details':
+    st.write("Show Details Option Selected")
     with st.form(key='my_form'):
-        position_input = st.text_input(label='Enter the Name:')
+        name_input = st.text_input(label='Enter the Name:')
         major_input = st.text_input(label='Enter the Major:')
         year_input = st.text_input(label='Enter the Year:')
-
+        maj="major"
+        y="year"
+        pos="name"
         submit_button = st.form_submit_button(label='Submit')
 
         # Connect to the database
@@ -50,8 +52,8 @@ if option == 'Show Details':
             conn = mysql.connector.connect(
                 host="localhost",
                 user="root",
-                password="purva@125",
-                database="dbmsproj"
+                password="104020",
+                database="proj"
             )
             if conn.is_connected():
                 cursor = conn.cursor()
@@ -59,41 +61,112 @@ if option == 'Show Details':
                 # Check if the form is submitted
                 if submit_button:
                     # Determine the query based on input columns
-                    if position_input and major_input and year_input:
+                    if name_input and major_input and year_input:
                         query = "SELECT * FROM senate WHERE name=%s AND major=%s AND year=%s"
-                        cursor.execute(query, (position_input, major_input, year_input))
-                    elif position_input and major_input:
+                        cursor.execute(query, (name_input, major_input, year_input))
+                        updated_rows = cursor.fetchall()
+                        df_updated = pd.DataFrame(updated_rows, columns=[i[0] for i in cursor.description])
+                        num_rows_updated = len(df_updated)
+                        st.write(f"Number of rows affected: {num_rows_updated}")
+                        st.table(df_updated)
+                        cursor.callproc("display_senate_three", (pos,name_input,maj, major_input, y,year_input, 0))  # Pass an OUT parameter
+                        cursor.execute("SELECT @_display_senate_three_3")
+                        result = cursor.fetchone()[0]
+                        conn.commit()
+                        st.success(f"Number of rows displayed successfully: {num_rows_updated}")
+                    elif name_input and major_input:
                         query = "SELECT * FROM senate WHERE name=%s AND major=%s"
-                        cursor.execute(query, (position_input, major_input))
-                    elif position_input and year_input:
+                        cursor.execute(query, (name_input, major_input))
+                        updated_rows = cursor.fetchall()
+                        df_updated = pd.DataFrame(updated_rows, columns=[i[0] for i in cursor.description])
+                        num_rows_updated = len(df_updated)
+                        st.write(f"Number of rows affected: {num_rows_updated}")
+                        st.table(df_updated)
+                        cursor.callproc("display_senate_two", (pos,name_input,maj, major_input ,0))  # Pass an OUT parameter
+                        cursor.execute("SELECT @_display_senate_two_2")
+                        result = cursor.fetchone()[0]
+                        conn.commit()
+                        st.success(f"Number of rows displayed successfully: {num_rows_updated}")
+                    elif name_input and year_input:
                         query = "SELECT * FROM senate WHERE name=%s AND year=%s"
-                        cursor.execute(query, (position_input, year_input))
+                        cursor.execute(query, (name_input, year_input))
+                        updated_rows = cursor.fetchall()
+                        df_updated = pd.DataFrame(updated_rows, columns=[i[0] for i in cursor.description])
+                        num_rows_updated = len(df_updated)
+                        st.write(f"Number of rows affected: {num_rows_updated}")
+                        st.table(df_updated)
+                        cursor.callproc("display_senate_two", (pos,name_input,y, year_input, 0))  # Pass an OUT parameter
+                        cursor.execute("SELECT @_display_senate_two_2")
+                        result = cursor.fetchone()[0]
+                        conn.commit()
+                        st.success(f"Number of rows displayed successfully: {num_rows_updated}")
                     elif major_input and year_input:
                         query = "SELECT * FROM senate WHERE major=%s AND year=%s"
                         cursor.execute(query, (major_input, year_input))
-                    elif position_input:
+                        updated_rows = cursor.fetchall()
+                        df_updated = pd.DataFrame(updated_rows, columns=[i[0] for i in cursor.description])
+                        num_rows_updated = len(df_updated)
+                        st.write(f"Number of rows affected: {num_rows_updated}")
+                        st.table(df_updated)
+                        cursor.callproc("display_senate_two", (maj,major_input, y,year_input, 0))  # Pass an OUT parameter
+                        cursor.execute("SELECT @_display_senate_two_2")
+                        result = cursor.fetchone()[0]
+                        conn.commit()
+                        st.success(f"Number of rows displayed successfully: {num_rows_updated}")
+                    elif name_input:
                         query = "SELECT * FROM senate WHERE name=%s"
-                        cursor.execute(query, (position_input,))
+                        cursor.execute(query, (name_input,))
+                        updated_rows = cursor.fetchall()
+                        df_updated = pd.DataFrame(updated_rows, columns=[i[0] for i in cursor.description])
+                        num_rows_updated = len(df_updated)
+                        st.write(f"Number of rows affected: {num_rows_updated}")
+                        st.table(df_updated)
+                        cursor.callproc("display_senate_one", (pos,name_input, 0))  # Pass an OUT parameter
+                        cursor.execute("SELECT @_display_senate_one_1")
+                        result = cursor.fetchone()[0]
+                        conn.commit()
+                        st.success(f"Number of rows displayed successfully: {num_rows_updated}")
                     elif major_input:
                         query = "SELECT * FROM senate WHERE major=%s"
                         cursor.execute(query, (major_input,))
+                        updated_rows = cursor.fetchall()
+                        df_updated = pd.DataFrame(updated_rows, columns=[i[0] for i in cursor.description])
+                        num_rows_updated = len(df_updated)
+                        st.write(f"Number of rows affected: {num_rows_updated}")
+                        st.table(df_updated)
+                        cursor.callproc("display_senate_one", (maj,major_input, 0))  # Pass an OUT parameter
+                        cursor.execute("SELECT @_display_senate_one_1")
+                        result = cursor.fetchone()[0]
+                        conn.commit()
+                        st.success(f"Number of rows displayed successfully: {num_rows_updated}")
                     elif year_input:
                         query = "SELECT * FROM senate WHERE year=%s"
                         cursor.execute(query, (year_input,))
+                        updated_rows = cursor.fetchall()
+                        df_updated = pd.DataFrame(updated_rows, columns=[i[0] for i in cursor.description])
+                        num_rows_updated = len(df_updated)
+                        st.write(f"Number of rows affected: {num_rows_updated}")
+                        st.table(df_updated)
+                        cursor.callproc("display_senate_one", (y,year_input, 0))  # Pass an OUT parameter
+                        cursor.execute("SELECT @_display_senate_one_1")
+                        result = cursor.fetchone()[0]
+                        conn.commit()
+                        st.success(f"Number of rows displayed successfully: {num_rows_updated}")
                     else:
                         query = "SELECT * FROM senate"
                         cursor.execute(query)
+                        updated_rows = cursor.fetchall()
+                        df_updated = pd.DataFrame(updated_rows, columns=[i[0] for i in cursor.description])
+                        num_rows_updated = len(df_updated)
+                        st.write(f"Number of rows affected: {num_rows_updated}")
+                        st.table(df_updated)
+                        cursor.callproc("display_senate_all", (0,))  # Pass an OUT parameter
+                        cursor.execute("SELECT @_display_senate_all_0")
+                        result = cursor.fetchone()[0]
+                        conn.commit()
+                        st.success(f"Number of rows displayed successfully: {num_rows_updated}")
 
                     rows = cursor.fetchall()
-
-                    # Create a DataFrame from fetched data
-                    df = pd.DataFrame(rows, columns=[i[0] for i in cursor.description])
-
-                    if df.empty:
-                        st.warning("The table does not have the specified attributes")
-                    else:
-                        # Display data in tabular form
-                        st.table(df)
                         
 
         except mysql.connector.Error as e:
@@ -128,11 +201,16 @@ elif option == 'Add Details':
                 # Check if the form is submitted
                 if submit_button:
                     # Update the details in the database
-                    query = "INSERT INTO senate (cr_netid,name,major,year,phone_no) VALUES (%s, %s, %s, %s, %s)"
-                 
-                    cursor.execute(query, ( netid_input,name_input,major_input, year_input,phone_input))
-                    conn.commit()
-                    st.success("Details added successfully!")
+                    try:
+                        cursor.callproc("insert_into_senate", (netid_input, name_input, phone_input, major_input, year_input, 0))
+                        cursor.execute("SELECT @p_rows_affected")
+                        result = cursor.fetchone()[0]
+                        result=1 
+                        conn.commit()
+                        st.write("Number of rows inserted sucessfully: ", result)
+                        st.success("Details added successfully!")
+                    except mysql.connector.Error as e:
+                        st.error(f"Error executing procedure: {e}")
 
         except mysql.connector.Error as e:
             st.error(f"Error connecting to MySQL database: {e}")
@@ -156,8 +234,8 @@ elif option == 'Update Details':
             conn = mysql.connector.connect(
                 host="localhost",
                 user="root",
-                password="purva@125",
-                database="dbmsproj"
+                password="104020",
+                database="proj"
             )
             if conn.is_connected():
                 cursor = conn.cursor()
@@ -167,19 +245,53 @@ elif option == 'Update Details':
                     # Check if filter field and data are provided
                     if filter_field_input and filter_data_input:
                         # Update the details in the database based on the filter
-                        query = f"UPDATE senate SET {field_input}=%s WHERE {filter_field_input}=%s"
-                        cursor.execute(query, (data_input, filter_data_input))
-                        if cursor.rowcount == 0:
-                            st.error("No such record exists.")
-                        else:
+                        try:
+                            # Call the stored procedure
+                            query=f"SELECT * FROM senate WHERE {filter_field_input} = %s"
+                            cursor.execute(query,(filter_data_input,))
+                            updated_rows = cursor.fetchall()
+                            cursor.callproc("update_senate", (field_input, data_input, filter_field_input, filter_data_input, 0))
+                            # Store the updated data in a DataFrame
+                            df_updated = pd.DataFrame(updated_rows, columns=[i[0] for i in cursor.description])
+                            # Count the number of rows in the DataFrame
+                            num_rows_updated = len(df_updated)
+        
+                            # Display the updated DataFrame and the number of rows updated
+                            #st.write("Updated DataFrame:")
+                            #st.write(df_updated)
+                            #st.write(f"Number of rows updated: {num_rows_updated}")
                             conn.commit()
-                            st.success("Details updated successfully!")
+                            st.success(f"Number of rows updated successfully: {num_rows_updated}")
+                        except mysql.connector.Error as e:
+                            st.error(f"Error executing procedure: {e}")
+
+
+                        finally:
+                            if conn.is_connected():
+                                cursor.close()
+                                conn.close()
                     else:
-                        # Update all records if no filter is provided
-                        query = f"UPDATE senate SET {field_input}=%s"
-                        cursor.execute(query, (data_input,))
-                        conn.commit()
-                        st.success("Details updated for all records!")
+                        try:
+                            # Call the stored procedure
+                            cursor.callproc("update_senate",(field_input,0))
+                            # Fetch the output parameter value
+                            query=f"SELECT * FROM senate"
+                            cursor.execute(query,())
+                            updated_rows = cursor.fetchall()
+
+                            # Store the updated data in a DataFrame
+                            df_updated = pd.DataFrame(updated_rows, columns=[i[0] for i in cursor.description])
+                            # Count the number of rows in the DataFrame
+                            num_rows_updated = len(df_updated)
+                            cursor.callproc("update_senate_for_all", (field_input, data_input, 0))
+                            # Display the updated DataFrame and the number of rows updated
+                            #st.write("Updated DataFrame:")
+                            #st.write(df_updated)
+                            #st.write(f"Number of rows updated: {num_rows_updated}")
+                            conn.commit()
+                            st.success(f"Number of rows updated successfully: {num_rows_updated}")
+                        except mysql.connector.Error as e:
+                            st.error(f"Error executing procedure: {e}")
 
         except mysql.connector.Error as e:
             st.error(f"Error connecting to MySQL database: {e}")
@@ -194,18 +306,20 @@ else:
    # Add code for delete details here
     st.write("Delete Details Option Selected")
     with st.form(key='delete_form'):
-        position_input = st.text_input(label='Enter the name:')
+        name_input = st.text_input(label='Enter the name:')
         major_input = st.text_input(label='Enter the Major:')
         year_input = st.text_input(label='Enter the Year:')
         submit_button = st.form_submit_button(label='Delete')
-
+        y="year"
+        maj="major"
+        pos="name"
         # Connect to the database
         try:
             conn = mysql.connector.connect(
                 host="localhost",
                 user="root",
-                password="purva@125",
-                database="dbmsproj"
+                password="104020",
+                database="proj"
             )
             if conn.is_connected():
                 cursor = conn.cursor()
@@ -213,35 +327,101 @@ else:
                 # Check if the form is submitted
                 if submit_button:
                     # Determine the query based on input columns
-                    if position_input and major_input and year_input:
-                        query = "DELETE FROM senate WHERE name=%s AND major=%s AND year=%s"
-                        cursor.execute(query, (position_input, major_input, year_input))
-                    elif position_input and major_input:
-                        query = "DELETE FROM senate WHERE name=%s AND major=%s"
-                        cursor.execute(query, (position_input, major_input))
-                    elif position_input and year_input:
-                        query = "DELETE FROM senate WHERE name=%s AND year=%s"
-                        cursor.execute(query, (position_input, year_input))
+                    if name_input and major_input and year_input:
+                        query=f"SELECT * FROM senate WHERE name= %s and major=%s and year=%s"
+                        cursor.execute(query,(name_input,major_input,year_input))
+                        updated_rows = cursor.fetchall()
+                        df_updated = pd.DataFrame(updated_rows, columns=[i[0] for i in cursor.description])
+                        num_rows_updated = len(df_updated)
+                        cursor.callproc("delete_senate_three", (pos,name_input,maj, major_input,y, year_input, 0))  # Pass an OUT parameter
+                        cursor.execute("SELECT @_delete_senate_three_3")
+                        result = cursor.fetchone()[0]
+                        conn.commit()
+                        st.success(f"Number of rows deleted successfully: {num_rows_updated}")
+
+                    elif name_input and major_input:
+                        query=f"SELECT * FROM senate WHERE name= %s and major=%s"
+                        cursor.execute(query,(name_input,major_input))
+                        updated_rows = cursor.fetchall()
+                        df_updated = pd.DataFrame(updated_rows, columns=[i[0] for i in cursor.description])
+                        num_rows_updated = len(df_updated)
+                        cursor.callproc("delete_senate_two", (pos,name_input,maj, major_input, 0))  # Pass an OUT parameter
+                        cursor.execute("SELECT @_delete_senate_two_2")
+                        result = cursor.fetchone()[0]
+                        conn.commit()
+                        st.success(f"Number of rows deleted successfully: {num_rows_updated}")
+
+                    elif name_input and year_input:
+                        query=f"SELECT * FROM senate WHERE name= %s and year=%s"
+                        cursor.execute(query,(name_input,year_input))
+                        updated_rows = cursor.fetchall()
+                        df_updated = pd.DataFrame(updated_rows, columns=[i[0] for i in cursor.description])
+                        num_rows_updated = len(df_updated)
+                        cursor.callproc("delete_senate_two",(pos,name_input, y,year_input, 0))  # Pass an OUT parameter
+                        cursor.execute("SELECT @_delete_senate_two_2")
+                        result = cursor.fetchone()[0]
+                        conn.commit()
+                        st.success(f"Number of rows deleted successfully: {num_rows_updated}")
+
                     elif major_input and year_input:
-                        query = "DELETE FROM senate WHERE major=%s AND year=%s"
-                        cursor.execute(query, (major_input, year_input))
-                    elif position_input:
-                        query = "DELETE FROM senate WHERE name=%s"
-                        cursor.execute(query, (position_input,))
+                        query=f"SELECT * FROM senate WHERE major=%s and year=%s"
+                        cursor.execute(query,(major_input,year_input))
+                        updated_rows = cursor.fetchall()
+                        df_updated = pd.DataFrame(updated_rows, columns=[i[0] for i in cursor.description])
+                        num_rows_updated = len(df_updated)
+                        cursor.callproc("delete_senate_two", (maj,major_input,y, year_input, 0))  # Pass an OUT parameter
+                        cursor.execute("SELECT @_delete_senate_two_2")
+                        result = cursor.fetchone()[0]
+                        conn.commit()
+                        st.success(f"Number of rows deleted successfully: {num_rows_updated}")
+
+                    elif name_input:
+                        query=f"SELECT * FROM senate WHERE name= %s"
+                        cursor.execute(query,(name_input))
+                        updated_rows = cursor.fetchall()
+                        df_updated = pd.DataFrame(updated_rows, columns=[i[0] for i in cursor.description])
+                        num_rows_updated = len(df_updated)
+                        cursor.callproc("delete_senate_one", (pos,name_input, 0))  # Pass an OUT parameter
+                        cursor.execute("SELECT @_delete_senate_one_1")
+                        result = cursor.fetchone()[0]
+                        conn.commit()
+                        st.success(f"Number of rows deleted successfully: {num_rows_updated}")
+
                     elif major_input:
-                        query = "DELETE FROM senate WHERE major=%s"
-                        cursor.execute(query, (major_input,))
+                        query=f"SELECT * FROM senate WHERE major=%s" 
+                        cursor.execute(query,(major_input))
+                        updated_rows = cursor.fetchall()
+                        df_updated = pd.DataFrame(updated_rows, columns=[i[0] for i in cursor.description])
+                        num_rows_updated = len(df_updated)
+                        cursor.callproc("delete_senate_one", (maj,major_input, 0))  # Pass an OUT parameter
+                        cursor.execute("SELECT @_delete_senate_one_1")
+                        result = cursor.fetchone()[0]
+                        conn.commit()
+                        st.success(f"Number of rows deleted successfully: {num_rows_updated}")
+
                     elif year_input:
-                        query = "DELETE FROM senate WHERE year=%s"
-                        cursor.execute(query, (year_input,))
+                        query=f"SELECT * FROM senate WHERE year=%s"
+                        cursor.execute(query,(year_input))
+                        updated_rows = cursor.fetchall()
+                        df_updated = pd.DataFrame(updated_rows, columns=[i[0] for i in cursor.description])
+                        num_rows_updated = len(df_updated)
+                        cursor.callproc("delete_senate_one", (y,year_input, 0))  # Pass an OUT parameter
+                        cursor.execute("SELECT @_delete_senate_one_1")
+                        result = cursor.fetchone()[0]
+                        conn.commit()
+                        st.success(f"Number of rows deleted successfully: {num_rows_updated}")
+
                     else:
-                        query = "DELETE FROM senate"
-                        cursor.execute(query)
-
-                    conn.commit()  # Commit the transaction
-
-                    st.success("Details deleted successfully!")
-
+                        query=f"SELECT * FROM senate"
+                        cursor.execute(query,())
+                        updated_rows = cursor.fetchall()
+                        df_updated = pd.DataFrame(updated_rows, columns=[i[0] for i in cursor.description])
+                        num_rows_updated = len(df_updated)
+                        cursor.callproc("delete_all_senate", (0,))  # Pass an OUT parameter
+                        cursor.execute("SELECT @_delete_all_senate_0")
+                        result = cursor.fetchone()[0]
+                        conn.commit()
+                        st.success(f"Number of rows deleted successfully: {num_rows_updated}")
         except mysql.connector.Error as e:
             st.error(f"Error connecting to MySQL database: {e}")
 
