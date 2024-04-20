@@ -160,8 +160,7 @@ if option == 'Show Details':
                         num_rows_updated = len(df_updated)
                         st.write(f"Number of rows affected: {num_rows_updated}")
                         st.table(df_updated)
-                        cursor.callproc("display_senate_all", (0,))  # Pass an OUT parameter
-                        cursor.execute("SELECT @_display_senate_all_0")
+                        cursor.execute("SELECT count_senate_rows()")
                         result = cursor.fetchone()[0]
                         conn.commit()
                         st.success(f"Number of rows displayed successfully: {num_rows_updated}")
@@ -417,8 +416,7 @@ else:
                         updated_rows = cursor.fetchall()
                         df_updated = pd.DataFrame(updated_rows, columns=[i[0] for i in cursor.description])
                         num_rows_updated = len(df_updated)
-                        cursor.callproc("delete_all_senate", (0,))  # Pass an OUT parameter
-                        cursor.execute("SELECT @_delete_all_senate_0")
+                        cursor.execute("SELECT delete_all_rows_senate()")
                         result = cursor.fetchone()[0]
                         conn.commit()
                         st.success(f"Number of rows deleted successfully: {num_rows_updated}")
