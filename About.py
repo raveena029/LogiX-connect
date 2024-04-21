@@ -42,14 +42,14 @@ def main():
         ### Get in Touch
         This website is a work in progress, and we're constantly looking for ways to improve it. We encourage you to explore all the resources available and don't hesitate to reach out with any questions or suggestions.
 
-        Together, let's make [College Name] the best place to be a student!
+        Together, let's make SNU the best place to be a student!
         """
     )
 
     st.markdown("---")
-    st.markdown("Created by Raveena Prasad")
-    st.markdown("Created by Purva Batra")
-    st.markdown("Created by Nitesh Choudhahry")
+    st.markdown("Created by-Raveena Prasad")
+    st.markdown("Purva Batra")
+    st.markdown("Nitesh Choudhahry")
 
 
 
