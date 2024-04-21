@@ -84,29 +84,69 @@ if 'logged_in' in st.session_state and (st.session_state.logged_in or option == 
                     if submit_button:
                         # Determine the query based on input columns
                         if position_input and major_input and year_input:
+                            query = "SELECT * FROM office_bearers WHERE position=%s AND major=%s AND year=%s"
+                            cursor.execute(query, (position_input, major_input, year_input))
+                            updated_rows = cursor.fetchall()
+                            df_updated = pd.DataFrame(updated_rows, columns=[i[0] for i in cursor.description])
+                            num_rows_updated = len(df_updated)
                             query = "call display_ob_three(%s,%s,%s,%s,%s,%s)"
                             cursor.execute(query, (pos,position_input, maj,major_input,y, year_input))
                         elif position_input and major_input:
+                            query = "SELECT * FROM office_bearers WHERE position=%s AND major=%s"
+                            cursor.execute(query, (position_input, major_input))
+                            updated_rows = cursor.fetchall()
+                            df_updated = pd.DataFrame(updated_rows, columns=[i[0] for i in cursor.description])
+                            num_rows_updated = len(df_updated)
                             query = "call display_ob_two(%s,%s,%s,%s)"
                             cursor.execute(query, (pos,position_input, maj,major_input))
                         elif position_input and year_input:
+                            query = "SELECT * FROM office_bearers WHERE position=%s AND year=%s"
+                            cursor.execute(query, (position_input, year_input))
+                            updated_rows = cursor.fetchall()
+                            df_updated = pd.DataFrame(updated_rows, columns=[i[0] for i in cursor.description])
                             query = "call display_ob_two(%s,%s,%s,%s)"
                             cursor.execute(query, (pos,position_input, y,year_input))
                         elif major_input and year_input:
+                            query = "SELECT * FROM office_bearers WHERE major=%s AND year=%s"
+                            cursor.execute(query, (major_input, year_input))
+                            updated_rows = cursor.fetchall()
+                            df_updated = pd.DataFrame(updated_rows, columns=[i[0] for i in cursor.description])
+                            num_rows_updated = len(df_updated)
                             query = "call display_ob_two(%s,%s,%s,%s)"
                             cursor.execute(query, (maj,major_input,y, year_input))
                         elif position_input:
+                            query = "SELECT * FROM office_bearers WHERE position=%s"
+                            cursor.execute(query, (position_input,))
+                            updated_rows = cursor.fetchall()
+                            df_updated = pd.DataFrame(updated_rows, columns=[i[0] for i in cursor.description])
+                            num_rows_updated = len(df_updated)
                             query = "call display_ob_one(%s,%s)"
                             cursor.execute(query, (pos,position_input,))
                         elif major_input:
+                            query = "SELECT * FROM office_bearers WHERE major=%s"
+                            cursor.execute(query, (major_input,))
+                            updated_rows = cursor.fetchall()
+                            df_updated = pd.DataFrame(updated_rows, columns=[i[0] for i in cursor.description])
+                            num_rows_updated = len(df_updated)
                             query = "call display_ob_one(%s,%s)"
                             cursor.execute(query, (maj,major_input,))
                         elif year_input:
+                            query = "SELECT * FROM office_bearers WHERE year=%s"
+                            cursor.execute(query, (year_input,))
+                            updated_rows = cursor.fetchall()
+                            df_updated = pd.DataFrame(updated_rows, columns=[i[0] for i in cursor.description])
+                            num_rows_updated = len(df_updated)
                             query = "call display_ob_one(%s,%s)"
                             cursor.execute(query, (y,year_input,))
                         else:
+                            query = "SELECT * FROM office_bearers"
+                            cursor.execute(query)
+                            updated_rows = cursor.fetchall()
+                            df_updated = pd.DataFrame(updated_rows, columns=[i[0] for i in cursor.description])
+                            num_rows_updated = len(df_updated)
                             query = "call display_ob_all()"
                             cursor.execute(query)
+                        st.success(f"Number of rows displayed successfully: {num_rows_updated}")
 
                         rows = cursor.fetchall()
 
@@ -158,12 +198,12 @@ if 'logged_in' in st.session_state and (st.session_state.logged_in or option == 
                     # Check if the form is submitted
                     if submit_button:
                         # Update the details in the database
+                        result=1
                         query = "call insert_into_ob(%s, %s, %s, %s, %s,%s,%s)"
-                     
                         cursor.execute(query, (netid_input,name_input,position_input, major_input, year_input,phone_input,email_input))
                         if auto_commit or commit_changes:
                             conn.commit()
-                            st.success("Details added successfully!")
+                            st.write("Number of rows inserted sucessfully: ", result)
                         else:
                             st.warning("Details will be rolled back unless you check 'Commit Changes'.")
                         logout()
@@ -203,6 +243,12 @@ if 'logged_in' in st.session_state and (st.session_state.logged_in or option == 
                     if submit_button:
                         # Check if filter field and data are provided
                         if filter_field_input and filter_data_input:
+                            query=f"SELECT * FROM office_bearers WHERE {filter_field_input} = %s"
+                            cursor.execute(query,(filter_data_input,))
+                            updated_rows = cursor.fetchall()
+                            df_updated = pd.DataFrame(updated_rows, columns=[i[0] for i in cursor.description])
+                            # Count the number of rows in the DataFrame
+                            num_rows_updated = len(df_updated)
                             # Update the details in the database based on the filter
                             query = "call update_ob(%s,%s,%s,%s)"
                             cursor.execute(query, (field_input,data_input, filter_field_input,filter_data_input))
@@ -211,18 +257,25 @@ if 'logged_in' in st.session_state and (st.session_state.logged_in or option == 
                             else:
                                 if auto_commit or commit_changes:
                                     conn.commit()
-                                    st.success("Details updated successfully!")
+                                    st.success(f"Number of rows updated successfully: {num_rows_updated}")
                                 else:
                                     st.warning("Details  will be rolled back unless you check 'Commit Changes'.")
                             logout()
                             #authenticate(password)
                         else:
                             # Update all records if no filter is provided
+                            query="SELECT * FROM office_bearers"
+                            cursor.execute(query,())
+                            updated_rows = cursor.fetchall()
+                            # Store the updated data in a DataFrame
+                            df_updated = pd.DataFrame(updated_rows, columns=[i[0] for i in cursor.description])
+                            # Count the number of rows in the DataFrame
+                            num_rows_updated = len(df_updated)
                             query ="call update_ob_for_all(%s,%s)"
                             cursor.execute(query, (field_input,data_input))
                             if auto_commit or commit_changes:
                                 conn.commit()
-                                st.success("Details updated successfully!")
+                                st.success(f"Number of rows updated successfully: {num_rows_updated}")
                             else:
                                 st.warning("Details updated but will be rolled back unless you check 'Commit Changes'.")
                         logout()
@@ -264,32 +317,72 @@ if 'logged_in' in st.session_state and (st.session_state.logged_in or option == 
                     if submit_button:
                         # Determine the query based on input columns
                         if position_input and major_input and year_input:
+                            query=f"SELECT * FROM office_bearers WHERE position= %s and major=%s and year=%s"
+                            cursor.execute(query,(position_input,major_input,year_input))
+                            updated_rows = cursor.fetchall()
+                            df_updated = pd.DataFrame(updated_rows, columns=[i[0] for i in cursor.description])
+                            num_rows_updated = len(df_updated)
                             query = "call delete_ob_three(%s,%s,%s,%s,%s,%s)"
                             cursor.execute(query, (pos,position_input,maj, major_input, y,year_input))
                         elif position_input and major_input:
+                            query=f"SELECT * FROM office_bearers WHERE position= %s and major=%s"
+                            cursor.execute(query,(position_input,major_input))
+                            updated_rows = cursor.fetchall()
+                            df_updated = pd.DataFrame(updated_rows, columns=[i[0] for i in cursor.description])
+                            num_rows_updated = len(df_updated)
                             query = "call delete_ob_two(%s,%s,%s,%s)"
                             cursor.execute(query, (pos,position_input, maj,major_input))
                         elif position_input and year_input:
+                            query=f"SELECT * FROM office_bearers WHERE position= %s and year=%s"
+                            cursor.execute(query,(position_input,year_input))
+                            updated_rows = cursor.fetchall()
+                            df_updated = pd.DataFrame(updated_rows, columns=[i[0] for i in cursor.description])
+                            num_rows_updated = len(df_updated)
                             query = "call delete_ob_two(%s,%s,%s,%s)"
                             cursor.execute(query, (pos,position_input,y, year_input))
                         elif major_input and year_input:
+                            query=f"SELECT * FROM office_bearers WHERE major=%s and year=%s"
+                            cursor.execute(query,(major_input,year_input))
+                            updated_rows = cursor.fetchall()
+                            df_updated = pd.DataFrame(updated_rows, columns=[i[0] for i in cursor.description])
+                            num_rows_updated = len(df_updated)
                             query = "call delete_ob_two(%s,%s,%s,%s)"
                             cursor.execute(query, (maj,major_input, y,year_input))
                         elif position_input:
+                            query=f"SELECT * FROM office_bearers WHERE position= %s"
+                            cursor.execute(query,(position_input,))
+                            updated_rows = cursor.fetchall()
+                            df_updated = pd.DataFrame(updated_rows, columns=[i[0] for i in cursor.description])
+                            num_rows_updated = len(df_updated)
                             query = "call delete_ob_one(%s,%s)"
                             cursor.execute(query, (pos,position_input))
                         elif major_input:
+                            query=f"SELECT * FROM office_bearers WHERE major=%s" 
+                            cursor.execute(query,(major_input,))
+                            updated_rows = cursor.fetchall()
+                            df_updated = pd.DataFrame(updated_rows, columns=[i[0] for i in cursor.description])
+                            num_rows_updated = len(df_updated)
                             query = "call delete_ob_one(%s,%s)"
                             cursor.execute(query, (maj,major_input))
                         elif year_input:
+                            query=f"SELECT * FROM office_bearers WHERE year=%s"
+                            cursor.execute(query,(year_input,))
+                            updated_rows = cursor.fetchall()
+                            df_updated = pd.DataFrame(updated_rows, columns=[i[0] for i in cursor.description])
+                            num_rows_updated = len(df_updated)
                             query = "call delete_ob_one(%s,%s)"
                             cursor.execute(query, (y,year_input))
                         else:
+                            query="SELECT * FROM office_bearers"
+                            cursor.execute(query,())
+                            updated_rows = cursor.fetchall()
+                            df_updated = pd.DataFrame(updated_rows, columns=[i[0] for i in cursor.description])
+                            num_rows_updated = len(df_updated)
                             query = "call delete_all_ob()"
                             cursor.execute(query)
                         if auto_commit or commit_changes:
                             conn.commit()
-                            st.success("Details deleted successfully!")
+                            st.success(f"Number of rows deleted successfully: {num_rows_updated}")
                         else:
                             st.warning("Details deleted but will be rolled back unless you check 'Commit Changes'.")
                         logout()
